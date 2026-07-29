@@ -147,19 +147,33 @@ def main():
                     source_info = doc.metadata.get('source', 'N/A')
                     act_info = doc.metadata.get('act_name', 'N/A')
                     section_info = doc.metadata.get('section_number', '')
+                    page_info = doc.metadata.get('page')
                     
                     source_text = f"  {i+1}. {source_info}"
                     if act_info != 'N/A':
                         source_text += f" | Act: {act_info}"
                     if section_info:
                         source_text += f" | {section_info}"
+                    if page_info:
+                        source_text += f" | Page {page_info}"
                     
                     print(source_text)
             else:
                 print("  ⚠️  No sources found.")
 
         except Exception as e:
-            print(f"\n❌ An error occurred: {e}")
+            error_type = type(e).__name__
+            error_msg = str(e)
+            
+            if any(err in error_type for err in ["PermissionDenied", "InvalidArgument", "NotFound", "Unauthenticated"]):
+                print(f"\n❌ API Error (Permanent): Please check your API key and model permissions.")
+                print(f"Details: {error_msg}")
+            elif "ResourceExhausted" in error_type:
+                print(f"\n❌ API Error (Rate Limit): You have exceeded your quota. Please wait and try again.")
+                print(f"Details: {error_msg}")
+            else:
+                print(f"\n❌ An unexpected error occurred: {error_msg}")
+            
             print("Please try rephrasing your question or check the system status.")
             
     print("\n👋 Chatbot Shutting Down...")

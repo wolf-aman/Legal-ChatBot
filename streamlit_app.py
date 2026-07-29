@@ -11,8 +11,7 @@ from utils.retrieval_service import setup_retrieval_pipeline
 from utils.llm_service import initialize_llm, get_rag_prompt
 from utils.rag_service import create_rag_chain
 from utils.config import GEMINI_MODEL_NAME
-from utils.document_loader import load_documents
-from utils.chunking_service import chunk_documents
+from utils.ingestion_service import ingest_documents
 
 # Configure Streamlit page
 st.set_page_config(
@@ -98,39 +97,11 @@ def process_uploaded_documents(uploaded_files):
                 f.write(uploaded_file.getbuffer())
             temp_files.append(file_path)
         
-        # Load documents from temporary files
-        documents = []
-        for file_path in temp_files:
-            try:
-                if file_path.lower().endswith('.pdf'):
-                    from langchain_community.document_loaders import PyPDFLoader
-                    loader = PyPDFLoader(file_path)
-                    docs = loader.load()
-                    documents.extend(docs)
-                elif file_path.lower().endswith('.txt'):
-                    from langchain_community.document_loaders import TextLoader
-                    loader = TextLoader(file_path)
-                    docs = loader.load()
-                    documents.extend(docs)
-            except Exception as e:
-                st.warning(f"Failed to load {os.path.basename(file_path)}: {str(e)}")
-                continue
-        
-        if not documents:
-            return False, "No valid documents could be processed"
-        
-        # Chunk the documents
-        chunks = chunk_documents(documents)
-        if not chunks:
-            return False, "No chunks were created from the documents"
-        
-        # Get vector store and add documents
+        # Delegate to the unified ingestion pipeline
         client = get_weaviate_client()
         embeddings = initialize_embeddings()
         vector_store = get_vector_store(client, embeddings)
-        
-        # Add documents to vector store
-        vector_store.add_documents(chunks)
+        num_chunks = ingest_documents(temp_files, client, vector_store)
         
         # Clean up temporary files
         for file_path in temp_files:
@@ -138,9 +109,15 @@ def process_uploaded_documents(uploaded_files):
                 os.remove(file_path)
             except:
                 pass
-        os.rmdir(temp_dir)
+        try:
+            os.rmdir(temp_dir)
+        except:
+            pass
         
-        return True, f"Successfully processed {len(documents)} documents and {len(chunks)} chunks"
+        if num_chunks == 0:
+            return False, "No valid documents could be processed"
+        
+        return True, f"Successfully processed and added {num_chunks} chunks"
         
     except Exception as e:
         return False, f"Error processing documents: {str(e)}"
@@ -157,6 +134,7 @@ def display_sources(sources):
         act_info = doc.metadata.get('act_name', 'N/A')
         section_info = doc.metadata.get('section_number', '')
         chapter_info = doc.metadata.get('chapter_name', '')
+        page_info = doc.metadata.get('page', '')
         
         # Create a more detailed source display
         source_text = f"**{i}.** {source_info}"
@@ -166,6 +144,8 @@ def display_sources(sources):
             source_text += f" - Section: {section_info}"
         if chapter_info:
             source_text += f" - Chapter: {chapter_info}"
+        if page_info:
+            source_text += f" - Page: {page_info}"
         
         st.markdown(f'<div class="source-item">{source_text}</div>', unsafe_allow_html=True)
 
@@ -303,10 +283,20 @@ def main():
                 st.rerun()
                 
             except Exception as e:
-                error_message = f"An error occurred: {str(e)}"
+                error_type = type(e).__name__
+                error_msg = str(e)
+                
+                # Check for known permanent Google API errors
+                if any(err in error_type for err in ["PermissionDenied", "InvalidArgument", "NotFound", "Unauthenticated"]):
+                    clean_message = f"API Error (Permanent): Please check your API key and model permissions. Details: {error_msg}"
+                elif "ResourceExhausted" in error_type:
+                    clean_message = f"API Error (Rate Limit): You have exceeded your quota. Please wait and try again. Details: {error_msg}"
+                else:
+                    clean_message = f"An unexpected error occurred: {error_msg}"
+                    
                 st.session_state.messages.append({
                     "role": "assistant", 
-                    "content": error_message,
+                    "content": f"❌ {clean_message}",
                     "sources": []
                 })
                 st.rerun()

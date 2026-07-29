@@ -249,11 +249,13 @@ If your legal documents are scanned images inside PDFs:
    - **macOS:** `brew install tesseract`
    - **Linux:** `sudo apt-get install tesseract-ocr`
 
-3. **Update the Poppler path** in [`utils/document_loader.py`](utils/document_loader.py):
+3. **Set the Poppler path** (Windows only) — add to your `.env` file:
 
-   ```python
-   POPPLER_PATH = r'C:\path\to\poppler\Library\bin'
+   ```env
+   POPPLER_PATH=C:\path\to\poppler\Library\bin
    ```
+
+   On macOS/Linux, Poppler is found via the system PATH automatically — no env var needed.
 
 ---
 

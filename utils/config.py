@@ -25,23 +25,27 @@ EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # --- Chunking Configuration ---
-CHUNK_SIZE = 750
-CHUNK_OVERLAP = 150
+CHUNK_SIZE = 1500
+CHUNK_OVERLAP = 200
 LEGAL_SEPARATORS = [
-    "\n\nCHAPTER ", "\n\nSection ", "\n\nArticle ", "\n\nPart ", "\n\nRule ",
+    # Section-level boundaries first (tried before character-count splitting)
+    "\n\nCHAPTER ", "\n\nPART ",
+    "\n\nSection ", "\n\nArticle ", "\n\nRule ",
+    # List/point separators
     "\n\nA.", "\n\nB.", "\n\nC.", "\n\nD.", "\n\nE.",
-    "\n✓ ", "\n- ", "\n\n", "\n", ". ", " ",
+    "\n✓ ", "\n- ",
+    # Generic paragraph/line/sentence/word boundaries
+    "\n\n", "\n", ". ", " ",
 ]
 
 # --- Retrieval & Reranking Configuration ---
 INITIAL_SEMANTIC_K = 10
-INITIAL_KEYWORD_K = 10
-RERANKER_TOP_K_CANDIDATES = 20
+HYBRID_ALPHA = 0.5  # 0.0 = pure BM25, 1.0 = pure vector, 0.5 = balanced
 FINAL_TOP_N_DOCS = 3
 RERANKER_MODEL_NAME = "BAAI/bge-reranker-base"
 
 # --- LLM Configuration (Gemini) ---
-GEMINI_MODEL_NAME = "gemini-1.5-pro"
+GEMINI_MODEL_NAME = "gemini-flash-latest"
 
 # --- Prompt Template ---
 RAG_PROMPT_TEMPLATE = """

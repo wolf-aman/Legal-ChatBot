@@ -3,15 +3,17 @@
 from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors import CrossEncoderReranker
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
-from .config import RERANKER_MODEL_NAME, FINAL_TOP_N_DOCS, INITIAL_SEMANTIC_K
+from .config import RERANKER_MODEL_NAME, FINAL_TOP_N_DOCS, INITIAL_SEMANTIC_K, HYBRID_ALPHA
 
 def setup_retrieval_pipeline(vector_store):
-    """Creates a retrieval pipeline with a base retriever and a reranker."""
-    print("Setting up retrieval pipeline with reranker...")
+    """Creates a retrieval pipeline with hybrid search and a reranker."""
+    print("Setting up retrieval pipeline with hybrid search + reranker...")
     
-    # 1. Create the base retriever for initial candidate search
+    # 1. Create the base retriever with Weaviate hybrid search (BM25 + vector)
+    # langchain-weaviate 0.0.5 already uses collection.query.hybrid() internally
+    # for all searches — the alpha parameter is passed through search_kwargs.
     base_retriever = vector_store.as_retriever(
-        search_kwargs={"k": INITIAL_SEMANTIC_K}
+        search_kwargs={"k": INITIAL_SEMANTIC_K, "alpha": HYBRID_ALPHA}
     )
 
     # 2. Initialize the CrossEncoder model for reranking
@@ -29,4 +31,3 @@ def setup_retrieval_pipeline(vector_store):
     
     print("Retrieval pipeline is set up successfully.")
     return compression_retriever
-

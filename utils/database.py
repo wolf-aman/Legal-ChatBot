@@ -2,10 +2,12 @@
 
 import weaviate
 from urllib.parse import urlparse
+from tenacity import retry, stop_after_attempt, wait_exponential
 from .config import WEAVIATE_URL, WEAVIATE_CLASS_NAME
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential())
 def get_weaviate_client():
-    """Initializes and returns the Weaviate v4 client."""
+    """Initializes and returns the Weaviate v4 client with automatic retry."""
     print(f"Connecting to Weaviate instance at {WEAVIATE_URL}...")
 
     # Parse the URL to extract components for the v4 client
@@ -48,4 +50,3 @@ def clear_weaviate_schema():
         raise
     finally:
         client.close() # Good practice to close the client connection
-

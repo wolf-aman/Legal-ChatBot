@@ -10,5 +10,8 @@ def get_vector_store(client, embeddings):
         index_name=WEAVIATE_CLASS_NAME,
         text_key="text",
         embedding=embeddings,
-        attributes=["source", "act_name", "section_number", "chapter_name", "rule_reference"]
+        attributes=[
+            "source", "act_name", "section_number", "chapter_name",
+            "rule_reference", "act_year", "jurisdiction", "chunk_id", "page",
+        ]
     )

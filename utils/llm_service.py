@@ -5,12 +5,13 @@ from langchain_core.prompts import ChatPromptTemplate
 from .config import GEMINI_API_KEY, GEMINI_MODEL_NAME, RAG_PROMPT_TEMPLATE
 
 def initialize_llm():
-    """Initializes the Gemini Chat Model."""
+    """Initializes the Gemini Chat Model with automatic retry on transient failures."""
     return ChatGoogleGenerativeAI(
         model=GEMINI_MODEL_NAME,
         google_api_key=GEMINI_API_KEY,
         temperature=0,
-        convert_system_message_to_human=True
+        convert_system_message_to_human=True,
+        max_retries=2
     )
 
 def get_rag_prompt():
