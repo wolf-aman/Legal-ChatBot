@@ -8,7 +8,7 @@ A production-ready **Retrieval-Augmented Generation (RAG)** chatbot purpose-buil
 
 - **Intelligent Document Ingestion** — Loads PDFs (including scanned ones via OCR) and TXT files, splits them with legal-aware separators, and enriches every chunk with structured metadata (act name, section number, chapter, rule reference).
 - **Hybrid Retrieval + Reranking** — Initial semantic search via Weaviate followed by a CrossEncoder reranker (`BAAI/bge-reranker-base`) to surface the most relevant passages.
-- **Google Gemini LLM** — Uses `gemini-1.5-pro` with a strict legal-assistant prompt that mandates source citations and refuses to hallucinate.
+- **Google Gemini LLM** — Uses `gemini-flash-latest` with a strict legal-assistant prompt that mandates source citations and refuses to hallucinate.
 - **Dual Interface** — Interactive CLI chatbot **and** a polished Streamlit web UI with live document upload, chat history, and formatted source display.
 - **RAG Evaluation** — Built-in evaluation script using the [Ragas](https://github.com/explodinggradients/ragas) framework (faithfulness, answer relevancy, context precision & recall).
 
@@ -34,7 +34,7 @@ User Question
                                                      ▼
                                             ┌────────────────────┐
                                             │  Google Gemini     │
-                                            │  (gemini-1.5-pro)  │
+                                            │  (gemini-flash-latest) │
                                             └────────┬───────────┘
                                                      │
                                                      ▼
@@ -180,7 +180,7 @@ Section 3 of the Motor Vehicles Act, 1988 states that...
 
 📚 Sources:
 ----------------------------------------
-  1. motor_vehicles_act.pdf | Act: Motor Vehicles Act, 1988 | Section 3
+  1. motor_vehicles_act.pdf | Act: Motor Vehicles Act, 1988 | Section 3 | Page 12
 ```
 
 Type `exit`, `quit`, or `q` to close.
@@ -200,11 +200,12 @@ All tuneable parameters live in [`utils/config.py`](utils/config.py):
 
 | Parameter | Default | Description |
 |---|---|---|
-| `GEMINI_MODEL_NAME` | `gemini-1.5-pro` | Google Gemini model |
+| `GEMINI_MODEL_NAME` | `gemini-flash-latest` | Google Gemini model |
 | `EMBEDDING_MODEL_NAME` | `sentence-transformers/all-MiniLM-L6-v2` | Local embedding model |
-| `CHUNK_SIZE` | `750` | Characters per chunk |
-| `CHUNK_OVERLAP` | `150` | Overlap between chunks |
+| `CHUNK_SIZE` | `1500` | Characters per chunk |
+| `CHUNK_OVERLAP` | `200` | Overlap between chunks |
 | `INITIAL_SEMANTIC_K` | `10` | Candidates from vector search |
+| `HYBRID_ALPHA` | `0.5` | 0.0 = pure BM25, 1.0 = pure vector, 0.5 = balanced |
 | `FINAL_TOP_N_DOCS` | `3` | Documents after reranking |
 | `RERANKER_MODEL_NAME` | `BAAI/bge-reranker-base` | CrossEncoder reranker |
 | `WEAVIATE_URL` | `http://localhost:8080` | Weaviate connection URL |
