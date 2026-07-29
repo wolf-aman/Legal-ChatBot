@@ -97,18 +97,20 @@ cd RAG2
 
 ### 2. Create a Virtual Environment
 
+We use `uv` for lightning-fast dependency management:
+
 ```bash
-python -m venv venv
+uv venv
 # Windows
-venv\Scripts\activate
+.venv\Scripts\activate
 # macOS / Linux
-source venv/bin/activate
+source .venv/bin/activate
 ```
 
 ### 3. Install Dependencies
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 ```
 
 ### 4. Configure Environment Variables
