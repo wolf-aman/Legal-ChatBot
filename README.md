@@ -262,18 +262,18 @@ If your legal documents are scanned images inside PDFs:
 
 ## 📦 Key Dependencies
 
-| Package | Purpose |
-|---|---|
-| `langchain` | Orchestration framework for the RAG pipeline |
-| `langchain-google-genai` | Google Gemini LLM integration |
-| `langchain-weaviate` | Weaviate vector store integration |
-| `weaviate-client` | Weaviate v4 Python client |
-| `sentence-transformers` | Local embedding model |
-| `torch` | PyTorch backend for embeddings & reranker |
-| `pypdf` | PDF text extraction |
-| `pytesseract` / `pdf2image` | OCR for scanned PDFs |
-| `streamlit` | Web UI framework |
-| `ragas` | RAG evaluation metrics |
+| Package | Version | Purpose |
+|---|---|---|
+| `langchain` | `0.1.20` | Orchestration framework for the RAG pipeline |
+| `langchain-google-genai` | `0.0.8` | Google Gemini LLM integration |
+| `langchain-weaviate` | `0.0.5` | Weaviate vector store integration |
+| `weaviate-client` | `4.5.3` | Weaviate v4 Python client |
+| `sentence-transformers` | `5.1.0` | Local embedding model |
+| `torch` | `2.8.0` | PyTorch backend for embeddings & reranker |
+| `pypdf` | `5.9.0` | PDF text extraction |
+| `pytesseract` / `pdf2image` | `0.3.13` / `1.17.0` | OCR for scanned PDFs |
+| `streamlit` | `1.49.1` | Web UI framework |
+| `ragas` | `0.0.22` | RAG evaluation metrics |
 
 ---
 
